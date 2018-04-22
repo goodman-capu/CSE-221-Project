@@ -65,40 +65,49 @@ private:
         uint64_t start, end;
         double sum = 0;
         
-        function<void()> callFunc = [](){procedureCall();};
-        switch (paraNum) {
-            case 0:
-                callFunc = [](){procedureCall();};
-                break;
-            case 1:
-                callFunc = [](){procedureCall(0);};
-                break;
-            case 2:
-                callFunc = [](){procedureCall(0, 0);};
-                break;
-            case 3:
-                callFunc = [](){procedureCall(0, 0, 0);};
-                break;
-            case 4:
-                callFunc = [](){procedureCall(0, 0, 0, 0);};
-                break;
-            case 5:
-                callFunc = [](){procedureCall(0, 0, 0, 0, 0);};
-                break;
-            case 6:
-                callFunc = [](){procedureCall(0, 0, 0, 0, 0, 0);};
-                break;
-            case 7:
-                callFunc = [](){procedureCall(0, 0, 0, 0, 0, 0, 0);};
-                break;
-            default:
-                break;
-        }
-        
         for (int i = 0; i < loop; ++i) {
-            start = __rdtsc();
-            callFunc();
-            end = __rdtsc();
+            switch (paraNum) {
+                case 1:
+                    start = __rdtsc();
+                    procedureCall(0);
+                    end = __rdtsc();
+                    break;
+                case 2:
+                    start = __rdtsc();
+                    procedureCall(0, 0);
+                    end = __rdtsc();
+                    break;
+                case 3:
+                    start = __rdtsc();
+                    procedureCall(0, 0, 0);
+                    end = __rdtsc();
+                    break;
+                case 4:
+                    start = __rdtsc();
+                    procedureCall(0, 0, 0, 0);
+                    end = __rdtsc();
+                    break;
+                case 5:
+                    start = __rdtsc();
+                    procedureCall(0, 0, 0, 0, 0);
+                    end = __rdtsc();
+                    break;
+                case 6:
+                    start = __rdtsc();
+                    procedureCall(0, 0, 0, 0, 0, 0);
+                    end = __rdtsc();
+                    break;
+                case 7:
+                    start = __rdtsc();
+                    procedureCall(0, 0, 0, 0, 0, 0, 0);
+                    end = __rdtsc();
+                    break;
+                default: // 0 params
+                    start = __rdtsc();
+                    procedureCall();
+                    end = __rdtsc();
+                    break;
+            }
             sum += (end - start);
         }
         
