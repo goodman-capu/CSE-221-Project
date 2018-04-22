@@ -7,9 +7,9 @@
 //
 
 #include <iostream>
+#include "CPU.cpp"
 
 int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
+    CPU::measureAll();
     return 0;
 }
