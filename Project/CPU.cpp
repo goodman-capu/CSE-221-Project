@@ -15,6 +15,7 @@ class CPU {
 public:
     static void measureAll() {
         Measurer::measure(timeOverhead, "Time Overhead");
+        Measurer::measure(loopOverhead, "Loop Overhead");
     }
     
 private:
@@ -22,10 +23,27 @@ private:
         uint64_t start, end;
         double sum = 0;
         
-        for (int i = 0; i < loop; i++) {
+        for (int i = 0; i < loop; ++i) {
             start = __rdtsc();
             end = __rdtsc();
             sum += (end - start);
+        }
+        
+        return sum / loop;
+    }
+    
+    static double loopOverhead() {
+        uint64_t start, end;
+        double sum = 0;
+        int loopTime = 10000;
+        
+        for (int i = 0; i < loop; ++i) {
+            start = __rdtsc();
+            for (int j = 0; j < loopTime; ++j) {
+                // Do nothing
+            }
+            end = __rdtsc();
+            sum += (double)(end - start) / loopTime;
         }
         
         return sum / loop;
