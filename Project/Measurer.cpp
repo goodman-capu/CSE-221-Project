@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <functional>
 #include <vector>
 #include <numeric>
 #include <math.h>
@@ -20,7 +21,7 @@ static string baseDir = "/Users/Frank/Documents/Code/CSE 221/Project/Project/Res
 
 class Measurer {
 public:
-    static void measure(double (*func)(), string name, int repeat = 20) {
+    static void measure(function<double ()> func, string name, int repeat = 20) {
         cout << "Measure " << name << " begins" << endl;
         
         fstream file;
