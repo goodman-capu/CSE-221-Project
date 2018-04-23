@@ -16,10 +16,10 @@
 #include <math.h>
 #include <unistd.h>
 #include <x86intrin.h>
-
+#include <pthread.h>
 using namespace std;
 
-static string baseDir = "/Users/Frank/Documents/Code/CSE 221/Project/Project/Results/";
+static string baseDir = "/Users/zhanyuan/Documents/GitHub/CSE221_Project/Project/Results/";
 
 class Measurer {
 public:
