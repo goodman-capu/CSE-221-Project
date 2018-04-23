@@ -49,6 +49,9 @@ public:
             outputResult(file, counter, result);
             counter++;
         }
+        if (results.size() % 5 != 0) {
+            file << endl;
+        }
         
         meanAndStd = getMeanAndStd(results);
         mean = meanAndStd.first;
