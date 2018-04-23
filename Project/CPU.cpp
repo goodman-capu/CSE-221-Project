@@ -67,64 +67,50 @@ private:
     static double procedureCallOverhead(int paraNum) {
         uint64_t start, end;
         
+        start = __rdtsc();
         switch (paraNum) {
             case 1:
-                start = __rdtsc();
                 for (int i = 0; i < loop; ++i) {
                     procedureCall(0);
                 }
-                end = __rdtsc();
                 break;
             case 2:
-                start = __rdtsc();
                 for (int i = 0; i < loop; ++i) {
                     procedureCall(0, 0);
                 }
-                end = __rdtsc();
                 break;
             case 3:
-                start = __rdtsc();
                 for (int i = 0; i < loop; ++i) {
                     procedureCall(0, 0, 0);
                 }
-                end = __rdtsc();
                 break;
             case 4:
-                start = __rdtsc();
                 for (int i = 0; i < loop; ++i) {
                     procedureCall(0, 0, 0, 0);
                 }
-                end = __rdtsc();
                 break;
             case 5:
-                start = __rdtsc();
                 for (int i = 0; i < loop; ++i) {
                     procedureCall(0, 0, 0, 0, 0);
                 }
-                end = __rdtsc();
                 break;
             case 6:
-                start = __rdtsc();
                 for (int i = 0; i < loop; ++i) {
                     procedureCall(0, 0, 0, 0, 0, 0);
                 }
-                end = __rdtsc();
                 break;
             case 7:
-                start = __rdtsc();
                 for (int i = 0; i < loop; ++i) {
                     procedureCall(0, 0, 0, 0, 0, 0, 0);
                 }
-                end = __rdtsc();
                 break;
             default:
-                start = __rdtsc();
                 for (int i = 0; i < loop; ++i) {
                     procedureCall();
                 }
-                end = __rdtsc();
                 break;
         }
+        end = __rdtsc();
         
         return (double)(end - start) / loop;
     }
