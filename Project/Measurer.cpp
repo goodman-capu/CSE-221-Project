@@ -16,10 +16,9 @@
 #include <math.h>
 #include <unistd.h>
 #include <x86intrin.h>
+#include "Config.cpp"
 
 using namespace std;
-
-static string baseDir = "/Users/Frank/Documents/Code/CSE 221/Project/Project/Results/";
 
 class Measurer {
 public:
