@@ -13,16 +13,16 @@ static int loop = 1000;
 class CPU {
 public:
     static void measureAll() {
-//        Measurer::measure(timeOverhead, "Time");
-//        Measurer::measure(loopOverhead, "Loop");
-//        for (int i = 0; i <= 7; ++i) {
-//            function<double()> func = [&i](){return procedureCallOverhead(i);};
-//            Measurer::measure(func, "Procedure Call (" + to_string(i) + " params)");
-//        }
-//        Measurer::measure(systemCallOverhead, "System Call");
-//        Measurer::measure(processCreateOverhead, "processCreate");
+        Measurer::measure(timeOverhead, "Time");
+        Measurer::measure(loopOverhead, "Loop");
+        for (int i = 0; i <= 7; ++i) {
+            function<double()> func = [&i](){return procedureCallOverhead(i);};
+            Measurer::measure(func, "Procedure Call (" + to_string(i) + " params)");
+        }
+        Measurer::measure(systemCallOverhead, "System Call");
+        Measurer::measure(processCreateOverhead, "processCreate");
         Measurer::measure(processContextSwitchOverhead, "processContextSwitch");
-       // Measurer::measure(threadCreateOverhead, "threadCreate");
+        Measurer::measure(threadCreateOverhead, "threadCreate");
     }
     
 private:
