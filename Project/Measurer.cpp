@@ -73,7 +73,7 @@ private:
     
     static void outputResult(ostream &os, int counter, double result) {
         os << left << setw(5) << to_string(counter) + ": ";
-        os << left << setw(8) << result;
+        os << left << setw(12) << result;
         if (counter % 5 == 0) {
             os << endl;
         }
