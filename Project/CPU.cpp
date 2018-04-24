@@ -138,7 +138,7 @@ private:
             pid = fork();
             if (pid == 0) {
                 exit(0);
-            } else if(pid < 0) {
+            } else if (pid < 0) {
                 exit(1);
             } else {
                 wait(NULL);
