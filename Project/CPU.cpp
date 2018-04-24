@@ -10,7 +10,7 @@
 #include <pthread.h>
 
 static int loop = 1000;
-static int pipefd[2];
+static int parentPipe[2], childPipe[2];
 
 class CPU {
 public:
@@ -24,6 +24,7 @@ public:
         Measurer::measure(systemCallOverhead, "System Call");
         Measurer::measure(processCreateOverhead, "Process Create");
         Measurer::measure(threadCreateOverhead, "Thread Create");
+        Measurer::measure(pipeOverhead, "Pipe");
         Measurer::measure(processContextSwitchOverhead, "Process Context Switch");
         Measurer::measure(threadContextSwitchOverhead, "Thread Context Switch");
     }
@@ -132,15 +133,12 @@ private:
     
     static double processCreateOverhead() {
         uint64_t start, end;
-        pid_t pid;
+
         start = __rdtsc();
         for (int i = 0; i < loop; ++i) {
-            pid = fork();
-            if (pid == 0) {
+            if (fork() == 0) { // Child
                 exit(0);
-            } else if (pid < 0) {
-                exit(1);
-            } else {
+            } else { // Parent
                 wait(NULL);
             }
         }
@@ -151,7 +149,9 @@ private:
     static double threadCreateOverhead() {
         uint64_t start, end;
         pthread_t thread;
-        auto startRoutine = [](void *)->void *{pthread_exit(NULL);};
+        auto startRoutine = [](void *)->void *{
+            pthread_exit(NULL);
+        };
         
         start = __rdtsc();
         for (int i = 0; i < loop; ++i) {
@@ -164,59 +164,71 @@ private:
         return (double)(end - start) / loop;
     }
     
-    // https://linux.die.net/man/2/pipe
-    static double processContextSwitchOverhead() {
+    static double pipeOverhead() {
         uint64_t start, end;
-        pid_t pid;
-        uint64_t sum = 0;
-        int num = 0;
-        pipe(pipefd);
-        for (int i = 0; i < loop; ++i) {
-            pid = fork();
-            if (pid != 0) {
-                start = __rdtsc();
-                
-                wait(NULL);
-                read(pipefd[0], (void *)&end, sizeof(uint64_t));
-            } else {
-                end = __rdtsc();
-                
-                write(pipefd[1], (void *)&end, sizeof(uint64_t));
-                exit(0);
-            }
-            if (end > start) {
-                num ++;
-                sum += end - start;
-            }
-        }
         
-        return (double)(sum) / num;
+        int pipefd[2];
+        pipe(pipefd);
+        start = __rdtsc();
+        int data;
+        for (int i = 0; i < loop; ++i) {
+            write(pipefd[1], (void *)&i, sizeof(int));
+            read(pipefd[0], (void *)&data, sizeof(int));
+        }
+        end = __rdtsc();
+        
+        return (double)(end - start) / (2 * loop);
     }
     
-    static void *sendEnd(void *) {
-        uint64_t end = __rdtsc();
+    static double processContextSwitchOverhead() {
+        uint64_t start, end;
         
-        write(pipefd[1], (void*)&end, sizeof(uint64_t));
+        pipe(parentPipe);
+        pipe(childPipe);
         
-        pthread_exit(NULL);
+        if (fork() == 0) { // Child
+            int data;
+            for (int i = 0; i < loop; ++i) {
+                write(childPipe[1], (void *)&i, sizeof(int));
+                read(parentPipe[0], (void *)&data, sizeof(int));
+            }
+            exit(0);
+        } else { // Parent
+            int data;
+            start = __rdtsc();
+            for (int i = 0; i < loop; ++i) {
+                write(parentPipe[1], (void *)&i, sizeof(int));
+                read(childPipe[0], (void *)&data, sizeof(int));
+            }
+            end = __rdtsc();
+        }
+        
+        return (double)(end - start) / loop;
     }
     
     static double threadContextSwitchOverhead() {
         uint64_t start, end;
+        
+        pipe(parentPipe);
+        pipe(childPipe);
         pthread_t thread;
-        uint64_t sum = 0;
-        int num = 0;
-        pipe(pipefd);
-        for (int i = 0; i < loop; ++i) {
-            pthread_create(&thread, NULL, sendEnd, NULL);
-            start = __rdtsc();
-            pthread_join(thread, NULL);
-            read(pipefd[0], (void*)&end, sizeof(uint64_t));
-            if (end > start) {
-                num ++;
-                sum += end - start;
+        auto childThread = [](void *)->void *{
+            int data;
+            for (int i = 0; i < loop; ++i) {
+                write(childPipe[1], (void *)&i, sizeof(int));
+                read(parentPipe[0], (void *)&data, sizeof(int));
             }
+            pthread_exit(NULL);
+        };
+        pthread_create(&thread, NULL, childThread, NULL);
+        int data;
+        start = __rdtsc();
+        for (int i = 0; i < loop; ++i) {
+            write(parentPipe[1], (void *)&i, sizeof(int));
+            read(childPipe[0], (void *)&data, sizeof(int));
         }
-        return (double)(sum) / num;
+        end = __rdtsc();
+
+        return (double)(end - start) / loop;
     }
 };
