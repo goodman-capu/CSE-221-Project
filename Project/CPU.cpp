@@ -14,17 +14,17 @@ static int pipefd[2];
 class CPU {
 public:
     static void measureAll() {
-//        Measurer::measure(timeOverhead, "Time");
-//        Measurer::measure(loopOverhead, "Loop");
-//        for (int i = 0; i <= 7; ++i) {
-//            function<double()> func = [&i](){return procedureCallOverhead(i);};
-//            Measurer::measure(func, "Procedure Call (" + to_string(i) + " params)");
-//        }
-//        Measurer::measure(systemCallOverhead, "System Call");
-//        Measurer::measure(processCreateOverhead, "processCreate");
-//        Measurer::measure(threadCreateOverhead, "threadCreate");
-//        Measurer::measure(processContextSwitchOverhead, "processContextSwitch");
-        Measurer::measure(threadContextSwitchOverhead, "threadContextSwitch");
+       Measurer::measure(timeOverhead, "Time");
+       Measurer::measure(loopOverhead, "Loop");
+       for (int i = 0; i <= 7; ++i) {
+           function<double()> func = [&i](){return procedureCallOverhead(i);};
+           Measurer::measure(func, "Procedure Call (" + to_string(i) + " params)");
+       }
+       Measurer::measure(systemCallOverhead, "System Call");
+       Measurer::measure(processCreateOverhead, "Process Create");
+       Measurer::measure(threadCreateOverhead, "Thread Create");
+       Measurer::measure(processContextSwitchOverhead, "Process Context Switch");
+       Measurer::measure(threadContextSwitchOverhead, "Thread Context Switch");
     }
     
 private:
