@@ -7,9 +7,10 @@
 //
 
 #include "Measurer.cpp"
+#include <pthread.h>
 
 static int loop = 1000;
-
+static int pipefd[2];
 class CPU {
 public:
     static void measureAll() {
@@ -20,6 +21,10 @@ public:
             Measurer::measure(func, "Procedure Call (" + to_string(i) + " params)");
         }
         Measurer::measure(systemCallOverhead, "System Call");
+        Measurer::measure(processCreateOverhead, "Process Create");
+        Measurer::measure(threadCreateOverhead, "Thread Create");
+        Measurer::measure(processContextSwitchOverhead, "Process Context Switch");
+        Measurer::measure(threadContextSwitchOverhead, "Thread Context Switch");
     }
     
 private:
@@ -122,5 +127,102 @@ private:
         end = __rdtsc();
         
         return (double)(end - start) / loop;
+    }
+    static double processCreateOverhead() {
+        uint64_t start, end;
+        pid_t pid;
+        start = __rdtsc();
+        for (int i = 0; i < loop; ++i) {
+            pid = fork();
+            if (pid == 0) {
+                exit(0);
+            }
+            else if(pid < 0)
+                exit(1);
+            else {
+                wait(NULL);
+            }
+        }
+        end = __rdtsc();
+        return (double)(end - start) / loop;
+        //return (double)(sum) / loop;
+    }
+    static void* startRoutine(void *) {
+        pthread_exit(NULL);
+    }
+    static double threadCreateOverhead() {
+        uint64_t start, end;
+        pthread_t thread;
+        start = __rdtsc();
+        for (int i = 0; i < loop; ++i) {
+            pthread_create(&thread, NULL, startRoutine, NULL);
+            //pthread_join() function suspend execution of the calling thread until the target thread terminates
+            pthread_join(thread, NULL);
+        }
+        end = __rdtsc();
+        return (double)(end - start) / loop;
+    }
+    
+    //https://linux.die.net/man/2/pipe
+    
+    static double processContextSwitchOverhead() {
+        uint64_t start, end;
+        pid_t pid;
+        uint64_t sum = 0;
+        int num = 0;
+        pipe(pipefd);
+        for (int i = 0; i < loop; ++i) {
+            pid = fork();
+            if(pid != 0)
+            {
+                start = __rdtsc();
+                
+                wait(NULL);
+                read(pipefd[0], (void*)&end, sizeof(uint64_t));
+            }
+            else
+            {
+                end = __rdtsc();
+                
+                write(pipefd[1], (void*)&end, sizeof(uint64_t));
+                exit(0);
+            }
+            if(end > start)
+            {
+                num ++;
+                sum += end - start;
+                
+            }
+        }
+
+        return (double)(sum) / num;
+    }
+    
+    static void *sendEnd(void *) {
+        uint64_t end = __rdtsc();
+        
+        write(pipefd[1], (void*)&end, sizeof(uint64_t));
+        
+        pthread_exit(NULL);
+    }
+    static double threadContextSwitchOverhead() {
+        uint64_t start, end;
+        pthread_t thread;
+        uint64_t sum = 0;
+        int num = 0;
+        pipe(pipefd);
+        for (int i = 0; i < loop; ++i) {
+            
+            pthread_create(&thread, NULL, sendEnd, NULL);
+            start = __rdtsc();
+            pthread_join(thread, NULL);
+            read(pipefd[0], (void*)&end, sizeof(uint64_t));
+            if(end > start)
+            {
+                num ++;
+                sum += end - start;
+            }
+        }
+        return (double)(sum) / num;
     }
 };
