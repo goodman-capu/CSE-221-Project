@@ -10,6 +10,7 @@
 		012E6E9F208D2D1700480799 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 012E6E9E208D2D1700480799 /* main.cpp */; };
 		014E677B208D3500005AAED1 /* Measurer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 014E677A208D3500005AAED1 /* Measurer.cpp */; };
 		014E677D208D3554005AAED1 /* CPU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 014E677C208D3554005AAED1 /* CPU.cpp */; };
+		014E677F208ED10A005AAED1 /* Config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 014E677E208ED10A005AAED1 /* Config.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,6 +30,7 @@
 		012E6E9E208D2D1700480799 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		014E677A208D3500005AAED1 /* Measurer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Measurer.cpp; sourceTree = "<group>"; };
 		014E677C208D3554005AAED1 /* CPU.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CPU.cpp; sourceTree = "<group>"; };
+		014E677E208ED10A005AAED1 /* Config.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Config.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +64,7 @@
 			isa = PBXGroup;
 			children = (
 				012E6E9E208D2D1700480799 /* main.cpp */,
+				014E677E208ED10A005AAED1 /* Config.cpp */,
 				014E677A208D3500005AAED1 /* Measurer.cpp */,
 				014E677C208D3554005AAED1 /* CPU.cpp */,
 			);
@@ -125,6 +128,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				014E677D208D3554005AAED1 /* CPU.cpp in Sources */,
+				014E677F208ED10A005AAED1 /* Config.cpp in Sources */,
 				014E677B208D3500005AAED1 /* Measurer.cpp in Sources */,
 				012E6E9F208D2D1700480799 /* main.cpp in Sources */,
 			);

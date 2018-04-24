@@ -16,10 +16,9 @@
 #include <math.h>
 #include <unistd.h>
 #include <x86intrin.h>
-#include <pthread.h>
-using namespace std;
+#include "Config.cpp"
 
-static string baseDir = "/Users/zhanyuan/Documents/GitHub/CSE221_Project/Project/Results/";
+using namespace std;
 
 class Measurer {
 public:
