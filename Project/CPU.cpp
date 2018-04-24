@@ -11,6 +11,7 @@
 
 static int loop = 1000;
 static int pipefd[2];
+
 class CPU {
 public:
     static void measureAll() {
@@ -61,7 +62,7 @@ private:
     static void procedureCall() {
         // Do nothing
     }
-
+    
     static void procedureCall(int a, ...) {
         // Do nothing
     }
@@ -128,6 +129,7 @@ private:
         
         return (double)(end - start) / loop;
     }
+    
     static double processCreateOverhead() {
         uint64_t start, end;
         pid_t pid;
@@ -136,35 +138,33 @@ private:
             pid = fork();
             if (pid == 0) {
                 exit(0);
-            }
-            else if(pid < 0)
+            } else if(pid < 0) {
                 exit(1);
-            else {
+            } else {
                 wait(NULL);
             }
         }
         end = __rdtsc();
         return (double)(end - start) / loop;
-        //return (double)(sum) / loop;
     }
-    static void* startRoutine(void *) {
-        pthread_exit(NULL);
-    }
+    
     static double threadCreateOverhead() {
         uint64_t start, end;
         pthread_t thread;
+        auto startRoutine = [](void *)->void *{pthread_exit(NULL);};
+        
         start = __rdtsc();
         for (int i = 0; i < loop; ++i) {
             pthread_create(&thread, NULL, startRoutine, NULL);
-            //pthread_join() function suspend execution of the calling thread until the target thread terminates
+            // pthread_join() function suspend execution of the calling thread until the target thread terminates
             pthread_join(thread, NULL);
         }
         end = __rdtsc();
+        
         return (double)(end - start) / loop;
     }
     
-    //https://linux.die.net/man/2/pipe
-    
+    // https://linux.die.net/man/2/pipe
     static double processContextSwitchOverhead() {
         uint64_t start, end;
         pid_t pid;
@@ -173,28 +173,23 @@ private:
         pipe(pipefd);
         for (int i = 0; i < loop; ++i) {
             pid = fork();
-            if(pid != 0)
-            {
+            if (pid != 0) {
                 start = __rdtsc();
                 
                 wait(NULL);
-                read(pipefd[0], (void*)&end, sizeof(uint64_t));
-            }
-            else
-            {
+                read(pipefd[0], (void *)&end, sizeof(uint64_t));
+            } else {
                 end = __rdtsc();
                 
-                write(pipefd[1], (void*)&end, sizeof(uint64_t));
+                write(pipefd[1], (void *)&end, sizeof(uint64_t));
                 exit(0);
             }
-            if(end > start)
-            {
+            if (end > start) {
                 num ++;
                 sum += end - start;
-                
             }
         }
-
+        
         return (double)(sum) / num;
     }
     
@@ -205,6 +200,7 @@ private:
         
         pthread_exit(NULL);
     }
+    
     static double threadContextSwitchOverhead() {
         uint64_t start, end;
         pthread_t thread;
@@ -212,13 +208,11 @@ private:
         int num = 0;
         pipe(pipefd);
         for (int i = 0; i < loop; ++i) {
-            
             pthread_create(&thread, NULL, sendEnd, NULL);
             start = __rdtsc();
             pthread_join(thread, NULL);
             read(pipefd[0], (void*)&end, sizeof(uint64_t));
-            if(end > start)
-            {
+            if (end > start) {
                 num ++;
                 sum += end - start;
             }
