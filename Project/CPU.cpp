@@ -60,57 +60,58 @@ private:
         return sum / loop;
     }
     
-    static void procedureCall() {
-        // Do nothing
-    }
-    
-    static void procedureCall(int a, ...) {
-        // Do nothing
-    }
-    
     static double procedureCallOverhead(int paraNum) {
         uint64_t start, end;
+        
+        auto procedureCall_0 = [](){};
+        auto procedureCall_1 = [](int a){};
+        auto procedureCall_2 = [](int a, int b){};
+        auto procedureCall_3 = [](int a, int b, int c){};
+        auto procedureCall_4 = [](int a, int b, int c, int d){};
+        auto procedureCall_5 = [](int a, int b, int c, int d, int e){};
+        auto procedureCall_6 = [](int a, int b, int c, int d, int e, int f){};
+        auto procedureCall_7 = [](int a, int b, int c, int d, int e, int f, int g){};
         
         start = __rdtsc();
         switch (paraNum) {
             case 1:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall(0);
+                    procedureCall_1(0);
                 }
                 break;
             case 2:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall(0, 0);
+                    procedureCall_2(0, 0);
                 }
                 break;
             case 3:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall(0, 0, 0);
+                    procedureCall_3(0, 0, 0);
                 }
                 break;
             case 4:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall(0, 0, 0, 0);
+                    procedureCall_4(0, 0, 0, 0);
                 }
                 break;
             case 5:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall(0, 0, 0, 0, 0);
+                    procedureCall_5(0, 0, 0, 0, 0);
                 }
                 break;
             case 6:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall(0, 0, 0, 0, 0, 0);
+                    procedureCall_6(0, 0, 0, 0, 0, 0);
                 }
                 break;
             case 7:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall(0, 0, 0, 0, 0, 0, 0);
+                    procedureCall_7(0, 0, 0, 0, 0, 0, 0);
                 }
                 break;
             default:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall();
+                    procedureCall_0();
                 }
                 break;
         }
@@ -169,8 +170,8 @@ private:
         
         int pipefd[2];
         pipe(pipefd);
-        start = __rdtsc();
         int data;
+        start = __rdtsc();
         for (int i = 0; i < loop; ++i) {
             write(pipefd[1], (void *)&i, sizeof(int));
             read(pipefd[0], (void *)&data, sizeof(int));
