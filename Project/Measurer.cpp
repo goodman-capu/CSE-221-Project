@@ -15,10 +15,14 @@
 #include <numeric>
 #include <math.h>
 #include <unistd.h>
-#include <x86intrin.h>
+#include <mach/mach_time.h>
 #include "Config.cpp"
 
 using namespace std;
+
+inline uint64_t rdtsc() {
+    return mach_absolute_time();
+}
 
 class Measurer {
 public:

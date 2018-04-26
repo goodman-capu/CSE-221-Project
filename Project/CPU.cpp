@@ -35,8 +35,8 @@ private:
         double sum = 0;
         
         for (int i = 0; i < loop; ++i) {
-            start = __rdtsc();
-            end = __rdtsc();
+            start = rdtsc();
+            end = rdtsc();
             sum += (end - start);
         }
         
@@ -49,11 +49,11 @@ private:
         int loopTime = 10000;
         
         for (int i = 0; i < loop; ++i) {
-            start = __rdtsc();
+            start = rdtsc();
             for (int j = 0; j < loopTime; ++j) {
                 // Do nothing
             }
-            end = __rdtsc();
+            end = rdtsc();
             sum += (double)(end - start) / loopTime;
         }
         
@@ -72,7 +72,7 @@ private:
         auto procedureCall_6 = [](int a, int b, int c, int d, int e, int f){};
         auto procedureCall_7 = [](int a, int b, int c, int d, int e, int f, int g){};
         
-        start = __rdtsc();
+        start = rdtsc();
         switch (paraNum) {
             case 1:
                 for (int i = 0; i < loop; ++i) {
@@ -115,7 +115,7 @@ private:
                 }
                 break;
         }
-        end = __rdtsc();
+        end = rdtsc();
         
         return (double)(end - start) / loop;
     }
@@ -123,11 +123,11 @@ private:
     static double systemCallOverhead() {
         uint64_t start, end;
         
-        start = __rdtsc();
+        start = rdtsc();
         for (int i = 0; i < loop; ++i) {
             chrono::system_clock::now();
         }
-        end = __rdtsc();
+        end = rdtsc();
         
         return (double)(end - start) / loop;
     }
@@ -135,7 +135,7 @@ private:
     static double processCreateOverhead() {
         uint64_t start, end;
 
-        start = __rdtsc();
+        start = rdtsc();
         for (int i = 0; i < loop; ++i) {
             if (fork() == 0) { // Child
                 exit(0);
@@ -143,7 +143,7 @@ private:
                 wait(NULL);
             }
         }
-        end = __rdtsc();
+        end = rdtsc();
         return (double)(end - start) / loop;
     }
     
@@ -154,13 +154,13 @@ private:
             pthread_exit(NULL);
         };
         
-        start = __rdtsc();
+        start = rdtsc();
         for (int i = 0; i < loop; ++i) {
             pthread_create(&thread, NULL, startRoutine, NULL);
             // pthread_join() function suspend execution of the calling thread until the target thread terminates
             pthread_join(thread, NULL);
         }
-        end = __rdtsc();
+        end = rdtsc();
         
         return (double)(end - start) / loop;
     }
@@ -171,12 +171,12 @@ private:
         int pipefd[2];
         pipe(pipefd);
         int data;
-        start = __rdtsc();
+        start = rdtsc();
         for (int i = 0; i < loop; ++i) {
             write(pipefd[1], (void *)&i, sizeof(int));
             read(pipefd[0], (void *)&data, sizeof(int));
         }
-        end = __rdtsc();
+        end = rdtsc();
         
         return (double)(end - start) / (2 * loop);
     }
@@ -196,12 +196,13 @@ private:
             exit(0);
         } else { // Parent
             int data;
-            start = __rdtsc();
+            start = rdtsc();
             for (int i = 0; i < loop; ++i) {
                 write(parentPipe[1], (void *)&i, sizeof(int));
                 read(childPipe[0], (void *)&data, sizeof(int));
             }
-            end = __rdtsc();
+            wait(NULL);
+            end = rdtsc();
         }
         
         return (double)(end - start) / loop;
@@ -223,12 +224,13 @@ private:
         };
         pthread_create(&thread, NULL, childThread, NULL);
         int data;
-        start = __rdtsc();
+        start = rdtsc();
         for (int i = 0; i < loop; ++i) {
             write(parentPipe[1], (void *)&i, sizeof(int));
             read(childPipe[0], (void *)&data, sizeof(int));
         }
-        end = __rdtsc();
+        pthread_join(thread, NULL);
+        end = rdtsc();
 
         return (double)(end - start) / loop;
     }
