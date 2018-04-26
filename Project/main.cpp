@@ -7,10 +7,8 @@
 //
 
 #include "CPU.cpp"
-#include <sys/resource.h>
 
 int main(int argc, const char * argv[]) {
-    setpriority(PRIO_PROCESS, getpid(), -20);
     CPU::measureAll();
     return 0;
 }
