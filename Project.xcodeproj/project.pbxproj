@@ -31,6 +31,7 @@
 		014E677A208D3500005AAED1 /* Measurer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Measurer.cpp; sourceTree = "<group>"; };
 		014E677C208D3554005AAED1 /* CPU.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CPU.cpp; sourceTree = "<group>"; };
 		014E677E208ED10A005AAED1 /* Config.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Config.cpp; sourceTree = "<group>"; };
+		01FEFCCC2091BCDA00198479 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +64,7 @@
 		012E6E9D208D2D1700480799 /* Project */ = {
 			isa = PBXGroup;
 			children = (
+				01FEFCCC2091BCDA00198479 /* Makefile */,
 				012E6E9E208D2D1700480799 /* main.cpp */,
 				014E677E208ED10A005AAED1 /* Config.cpp */,
 				014E677A208D3500005AAED1 /* Measurer.cpp */,
