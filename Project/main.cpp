@@ -9,6 +9,6 @@
 #include "CPU.cpp"
 
 int main(int argc, const char * argv[]) {
-    CPU::measureAll();
+    CPU::measure_all();
     return 0;
 }

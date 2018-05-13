@@ -10,4 +10,4 @@
 
 using namespace std;
 
-static string baseDir = "/Users/Frank/Documents/Code/CSE 221/Project/Project/Results/";
+static string base_dir = "/Users/Frank/Documents/Code/CSE 221/Project/Project/Results/";

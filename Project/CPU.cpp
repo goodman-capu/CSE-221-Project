@@ -10,27 +10,27 @@
 #include <pthread.h>
 
 static int loop = 10;
-static int parentPipe[2], childPipe[2];
+static int parent_pipe[2], child_pipe[2];
 
 class CPU {
 public:
-    static void measureAll() {
-        Measurer::measure(timeOverhead, "Time");
-        Measurer::measure(loopOverhead, "Loop");
+    static void measure_all() {
+        Measurer::measure_overhead(time_overhead, "Time");
+        Measurer::measure_overhead(loop_overhead, "Loop");
         for (int i = 0; i <= 7; ++i) {
-            function<double()> func = [&i](){return procedureCallOverhead(i);};
-            Measurer::measure(func, "Procedure Call (" + to_string(i) + " params)");
+            function<double()> func = [&i](){return procedure_call_overhead(i);};
+            Measurer::measure_overhead(func, "Procedure Call (" + to_string(i) + " params)");
         }
-        Measurer::measure(systemCallOverhead, "System Call");
-        Measurer::measure(processCreateOverhead, "Process Create", Measurer::STD | Measurer::MIN);
-        Measurer::measure(threadCreateOverhead, "Thread Create", Measurer::STD | Measurer::MIN);
-        Measurer::measure(pipeOverhead, "Pipe");
-        Measurer::measure(processContextSwitchOverhead, "Process Context Switch", Measurer::STD | Measurer::MIN);
-        Measurer::measure(threadContextSwitchOverhead, "Thread Context Switch", Measurer::STD | Measurer::MIN);
+        Measurer::measure_overhead(system_call_overhead, "System Call");
+        Measurer::measure_overhead(process_create_overhead, "Process Create", Measurer::STD | Measurer::MIN);
+        Measurer::measure_overhead(thread_create_overhead, "Thread Create", Measurer::STD | Measurer::MIN);
+        Measurer::measure_overhead(pipe_overhead, "Pipe");
+        Measurer::measure_overhead(process_context_switch_overhead, "Process Context Switch", Measurer::STD | Measurer::MIN);
+        Measurer::measure_overhead(thread_context_switch_overhead, "Thread Context Switch", Measurer::STD | Measurer::MIN);
     }
     
 private:
-    static double timeOverhead() {
+    static double time_overhead() {
         uint64_t start, end;
         double sum = 0;
         
@@ -43,7 +43,7 @@ private:
         return sum / loop;
     }
     
-    static double loopOverhead() {
+    static double loop_overhead() {
         uint64_t start, end;
         double sum = 0;
         int loopTime = 10000;
@@ -60,58 +60,58 @@ private:
         return sum / loop;
     }
     
-    static double procedureCallOverhead(int paraNum) {
+    static double procedure_call_overhead(int para_num) {
         uint64_t start, end;
         
-        auto procedureCall_0 = [](){};
-        auto procedureCall_1 = [](int a){};
-        auto procedureCall_2 = [](int a, int b){};
-        auto procedureCall_3 = [](int a, int b, int c){};
-        auto procedureCall_4 = [](int a, int b, int c, int d){};
-        auto procedureCall_5 = [](int a, int b, int c, int d, int e){};
-        auto procedureCall_6 = [](int a, int b, int c, int d, int e, int f){};
-        auto procedureCall_7 = [](int a, int b, int c, int d, int e, int f, int g){};
+        auto procedure_call_0 = [](){};
+        auto procedure_call_1 = [](int a){};
+        auto procedure_call_2 = [](int a, int b){};
+        auto procedure_call_3 = [](int a, int b, int c){};
+        auto procedure_call_4 = [](int a, int b, int c, int d){};
+        auto procedure_call_5 = [](int a, int b, int c, int d, int e){};
+        auto procedure_call_6 = [](int a, int b, int c, int d, int e, int f){};
+        auto procedure_call_7 = [](int a, int b, int c, int d, int e, int f, int g){};
         
         start = rdtsc();
-        switch (paraNum) {
+        switch (para_num) {
             case 1:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall_1(0);
+                    procedure_call_1(0);
                 }
                 break;
             case 2:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall_2(0, 0);
+                    procedure_call_2(0, 0);
                 }
                 break;
             case 3:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall_3(0, 0, 0);
+                    procedure_call_3(0, 0, 0);
                 }
                 break;
             case 4:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall_4(0, 0, 0, 0);
+                    procedure_call_4(0, 0, 0, 0);
                 }
                 break;
             case 5:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall_5(0, 0, 0, 0, 0);
+                    procedure_call_5(0, 0, 0, 0, 0);
                 }
                 break;
             case 6:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall_6(0, 0, 0, 0, 0, 0);
+                    procedure_call_6(0, 0, 0, 0, 0, 0);
                 }
                 break;
             case 7:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall_7(0, 0, 0, 0, 0, 0, 0);
+                    procedure_call_7(0, 0, 0, 0, 0, 0, 0);
                 }
                 break;
             default:
                 for (int i = 0; i < loop; ++i) {
-                    procedureCall_0();
+                    procedure_call_0();
                 }
                 break;
         }
@@ -120,7 +120,7 @@ private:
         return (double)(end - start) / loop;
     }
     
-    static double systemCallOverhead() {
+    static double system_call_overhead() {
         uint64_t start, end;
         
         start = rdtsc();
@@ -132,7 +132,7 @@ private:
         return (double)(end - start) / loop;
     }
     
-    static double processCreateOverhead() {
+    static double process_create_overhead() {
         uint64_t start, end;
 
         start = rdtsc();
@@ -147,16 +147,16 @@ private:
         return (double)(end - start) / loop;
     }
     
-    static double threadCreateOverhead() {
+    static double thread_create_overhead() {
         uint64_t start, end;
         pthread_t thread;
-        auto startRoutine = [](void *)->void *{
+        auto start_routine = [](void *)->void *{
             pthread_exit(NULL);
         };
         
         start = rdtsc();
         for (int i = 0; i < loop; ++i) {
-            pthread_create(&thread, NULL, startRoutine, NULL);
+            pthread_create(&thread, NULL, start_routine, NULL);
             pthread_join(thread, NULL);
         }
         end = rdtsc();
@@ -164,7 +164,7 @@ private:
         return (double)(end - start) / loop;
     }
     
-    static double pipeOverhead() {
+    static double pipe_overhead() {
         uint64_t start, end;
         
         int pipefd[2];
@@ -182,66 +182,66 @@ private:
         return (double)(end - start) / (2 * loop);
     }
     
-    static double processContextSwitchOverhead() {
+    static double process_context_switch_overhead() {
         uint64_t start, end;
         uint64_t sum = 0;
         
-        pipe(parentPipe);
-        pipe(childPipe);
+        pipe(parent_pipe);
+        pipe(child_pipe);
         int temp = 0;
         for (int i = 0; i < loop; ++i) {
             if (fork() == 0) { // Child
                 end = rdtsc();
-                write(parentPipe[1], (void *)&end, sizeof(uint64_t));
+                write(parent_pipe[1], (void *)&end, sizeof(uint64_t));
                 // Force context switch
-                read(childPipe[0], (void *)&temp, sizeof(int));
+                read(child_pipe[0], (void *)&temp, sizeof(int));
                 exit(EXIT_SUCCESS);
             } else { // Parent
                 start = rdtsc();
                 // Force context switch
-                read(parentPipe[0], (void *)&end, sizeof(uint64_t));
-                write(childPipe[1], (void *)&temp, sizeof(int));
+                read(parent_pipe[0], (void *)&end, sizeof(uint64_t));
+                write(child_pipe[1], (void *)&temp, sizeof(int));
                 wait(NULL);
                 sum += abs((int64_t)(end - start));
             }
         }
-        close(parentPipe[0]);
-        close(parentPipe[1]);
-        close(childPipe[0]);
-        close(childPipe[1]);
+        close(parent_pipe[0]);
+        close(parent_pipe[1]);
+        close(child_pipe[0]);
+        close(child_pipe[1]);
         
         return (double)sum / loop;
     }
     
-    static double threadContextSwitchOverhead() {
+    static double thread_context_switch_overhead() {
         uint64_t start, end;
         uint64_t sum = 0;
         
-        pipe(parentPipe);
-        pipe(childPipe);
+        pipe(parent_pipe);
+        pipe(child_pipe);
         int temp = 0;
         pthread_t thread;
-        auto childThread = [](void *)->void *{
+        auto child_thread = [](void *)->void *{
             uint64_t end = rdtsc();
             int temp = 0;
-            write(parentPipe[1], (void *)&end, sizeof(uint64_t));
+            write(parent_pipe[1], (void *)&end, sizeof(uint64_t));
             // Force context switch
-            read(childPipe[0], (void *)&temp, sizeof(int));
+            read(child_pipe[0], (void *)&temp, sizeof(int));
             pthread_exit(NULL);
         };
         for (int i = 0; i < loop; ++i) {
-            pthread_create(&thread, NULL, childThread, NULL);
+            pthread_create(&thread, NULL, child_thread, NULL);
             start = rdtsc();
             // Force context switch
-            read(parentPipe[0], (void *)&end, sizeof(uint64_t));
-            write(childPipe[1], (void *)&temp, sizeof(int));
+            read(parent_pipe[0], (void *)&end, sizeof(uint64_t));
+            write(child_pipe[1], (void *)&temp, sizeof(int));
             pthread_join(thread, NULL);
             sum += abs((int64_t)(end - start));
         }
-        close(parentPipe[0]);
-        close(parentPipe[1]);
-        close(childPipe[0]);
-        close(childPipe[1]);
+        close(parent_pipe[0]);
+        close(parent_pipe[1]);
+        close(child_pipe[0]);
+        close(child_pipe[1]);
         
         return (double)sum / loop;
     }
