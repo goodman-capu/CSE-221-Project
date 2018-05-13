@@ -6,7 +6,7 @@
 //  Copyright © 2018年 范志康. All rights reserved.
 //
 
-#include "Measurer.cpp"
+#include "Measurer.hpp"
 #include <pthread.h>
 
 static int loop = 10;
