@@ -15,6 +15,9 @@
 #include <fstream>
 #include <unistd.h>
 #include <functional>
+#include <math.h>
+#include <numeric>
+#include <vector>
 #include <mach/mach_time.h>
 #include "Config.hpp"
 
@@ -26,6 +29,12 @@ inline uint64_t rdtsc() {
     return mach_absolute_time();
 }
 
+struct m_stat {
+    double mean;
+    double std;
+    double min;
+};
+
 class Measurer {
 public:
     enum FILTER_TYPE {
@@ -33,7 +42,12 @@ public:
         MIN = 1 << 1,
     };
     
-    static void measure_overhead(function<double ()> func, string name, int filters = STD);
+    static void measure(function<double()> func, string name, string type, int filters = STD);
+    
+    static void measure_multi(function<double(int)> func, vector<int> params, string func_name, string param_name, string type, int filters = STD);
+    
+private:
+    static m_stat _measure(function<double()> func, ostream &out, string file_name, int filters);
 };
 
 #endif
