@@ -10,9 +10,7 @@
 		0119B5D520A7FB8D00C73BEF /* Memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0119B5D420A7FB8D00C73BEF /* Memory.cpp */; };
 		0119B5D720A7FD3900C73BEF /* Measurer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0119B5D620A7FD3900C73BEF /* Measurer.cpp */; };
 		012E6E9F208D2D1700480799 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 012E6E9E208D2D1700480799 /* main.cpp */; };
-		014E677B208D3500005AAED1 /* Measurer.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 014E677A208D3500005AAED1 /* Measurer.hpp */; };
 		014E677D208D3554005AAED1 /* CPU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 014E677C208D3554005AAED1 /* CPU.cpp */; };
-		014E677F208ED10A005AAED1 /* Config.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 014E677E208ED10A005AAED1 /* Config.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -136,8 +134,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				012E6E9F208D2D1700480799 /* main.cpp in Sources */,
-				014E677F208ED10A005AAED1 /* Config.hpp in Sources */,
-				014E677B208D3500005AAED1 /* Measurer.hpp in Sources */,
 				0119B5D720A7FD3900C73BEF /* Measurer.cpp in Sources */,
 				014E677D208D3554005AAED1 /* CPU.cpp in Sources */,
 				0119B5D520A7FB8D00C73BEF /* Memory.cpp in Sources */,
