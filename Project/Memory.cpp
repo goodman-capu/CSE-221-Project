@@ -14,7 +14,7 @@ class Memory {
 public:
     static void measure_all() {
         vector<int> sizes;
-        for (int i = 12; i < 28; i++) {
+        for (int i = 10; i < 28; i++) {
             sizes.push_back(pow(2, i));
         }
         Measurer::measure_multi(memory_access_latency, sizes, "Memory Access", "Array Size", "Latency");
@@ -27,7 +27,7 @@ private:
     static double memory_access_latency(int size) {
         uint64_t start, end;
         
-        int repeat = 1024, stride = size / 1024;
+        int repeat = 1024, stride = size / repeat;
         
         int *array = (int *)malloc(size * sizeof(int));
         for (int i = 0; i < size; i++) {
