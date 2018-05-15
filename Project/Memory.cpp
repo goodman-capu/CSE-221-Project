@@ -47,7 +47,7 @@ private:
     static double memory_read_bandwidth() {
         uint64_t start, end;
 
-        size_t total_size = 128 * 1024 * 1024, read_size = 4 * 1024;
+        size_t total_size = 128 * pow(2, 20), read_size = 4 * pow(2, 10);
         long repeat = total_size / read_size;
         char *data = (char *)malloc(total_size);
         char *buffer = (char *)malloc(read_size);
@@ -67,7 +67,7 @@ private:
     static double memory_write_bandwidth() {
         uint64_t start, end;
         
-        size_t total_size = 128 * 1024 * 1024;
+        size_t total_size = 128 * pow(2, 20);
         char *data = (char *)malloc(total_size);
         memset(data, 0, total_size);
         start = rdtsc();
@@ -81,23 +81,29 @@ private:
     static double page_fault_time() {
         uint64_t start, end;
         
-        size_t total_size = (unsigned long)pow(2, 30) * 20, read_size = 4 * 1024;
-        long repeat = 5;
-        size_t stride = total_size / repeat;
-        char *data = (char *)malloc(total_size);
-        char *buffer = (char *)malloc(read_size);
-        memset(data, 0, total_size);
-        memset(buffer, 0, read_size);
-        for (int i = 0; i < repeat; i++) {
-            memset(data + i * stride, 1, read_size);
-        }
+        size_t file_size = 2 * pow(2, 30), stride = 256 * pow(2, 20);
+        int repeat = (int)(file_size / stride);
+        string file_name = base_dir + "temp";
+        FILE *fptr = fopen(file_name.data(), "w");
+        char *content = (char *)malloc(file_size);
+        memset(content, 0, file_size);
+        fwrite(content, sizeof(char), file_size, fptr);
+        free(content);
+        fclose(fptr);
+        
+        int file_des = open(file_name.data(), O_RDWR);
+        char *map = (char *)mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, file_des, 0);
+        
         start = rdtsc();
+        char temp;
         for (int i = 0; i < repeat; i++) {
-            memcpy(buffer, data + i * stride, read_size);
+            temp = map[i * stride];
         }
         end = rdtsc();
-        free(data);
-        free(buffer);
+        
+        munmap(map, file_size);
+        close(file_des);
+        remove(file_name.data());
         
         return (double)(end - start) / repeat;
     }
