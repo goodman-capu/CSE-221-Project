@@ -18,16 +18,21 @@
 #include <math.h>
 #include <numeric>
 #include <vector>
-#include <mach/mach_time.h>
 #include "Config.hpp"
+
+#ifdef __APPLE__
+#include <mach/mach_time.h>
+#endif
 
 using namespace std;
 
 static int repeat = 200;
 
+#ifdef __APPLE__
 inline uint64_t rdtsc() {
     return mach_absolute_time();
 }
+#endif
 
 struct m_stat {
     double mean;
