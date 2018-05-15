@@ -16,7 +16,7 @@ class Memory {
 public:
     static void measure_all() {
         vector<int> sizes;
-        for (int i = 12; i < 26; i++) {
+        for (int i = 12; i < 28; i++) {
             sizes.push_back(pow(2, i));
         }
         Measurer::measure_multi(memory_access_latency, sizes, "Memory Access", "Array Size", "Latency");
