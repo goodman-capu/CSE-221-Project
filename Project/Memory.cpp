@@ -15,13 +15,13 @@ static int mem_loop = 1e6;
 class Memory {
 public:
     static void measure_all() {
-//        vector<int> sizes;
-//        for (int i = 12; i < 26; i++) {
-//            sizes.push_back(pow(2, i));
-//        }
-//        Measurer::measure_multi(memory_access_latency, sizes, "Memory Access", "Array Size", "Latency");
-//        Measurer::measure(memory_read_bandwidth, "Memory Read", "Bandwidth");
-//        Measurer::measure(memory_write_bandwidth, "Memory Write", "Bandwidth");
+        vector<int> sizes;
+        for (int i = 12; i < 26; i++) {
+            sizes.push_back(pow(2, i));
+        }
+        Measurer::measure_multi(memory_access_latency, sizes, "Memory Access", "Array Size", "Latency");
+        Measurer::measure(memory_read_bandwidth, "Memory Read", "Bandwidth");
+        Measurer::measure(memory_write_bandwidth, "Memory Write", "Bandwidth");
         Measurer::measure(page_fault_time, "Page Fault", "Time");
     }
     
