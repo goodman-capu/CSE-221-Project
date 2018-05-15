@@ -10,8 +10,6 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-static int mem_loop = 1e6;
-
 class Memory {
 public:
     static void measure_all() {
@@ -28,7 +26,8 @@ public:
 private:
     static double memory_access_latency(int size) {
         uint64_t start, end;
-        int stride = size / 1024;
+        
+        int repeat = 1024, stride = size / 1024;
         
         int *array = (int *)malloc(size * sizeof(int));
         for (int i = 0; i < size; i++) {
@@ -36,12 +35,12 @@ private:
         }
         start = rdtsc();
         int temp = 0;
-        for (int i = 0; i < mem_loop; i++) {
+        for (int i = 0; i < repeat; i++) {
             temp = array[temp];
         }
         end = rdtsc();
         free(array);
-        return (double)(end - start) / mem_loop;
+        return (double)(end - start) / repeat;
     }
     
     static double memory_read_bandwidth() {
