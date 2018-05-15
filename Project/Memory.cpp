@@ -99,6 +99,6 @@ private:
         free(data);
         free(buffer);
         
-        return total_size / ((double)(end - start) * repeat);
+        return (double)(end - start) / repeat;
     }
 };
