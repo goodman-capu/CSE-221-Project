@@ -26,7 +26,7 @@
 
 using namespace std;
 
-static int repeat = 200;
+static int repeat = 100;
 
 #ifdef __APPLE__
 inline uint64_t rdtsc() {
