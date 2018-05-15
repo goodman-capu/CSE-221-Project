@@ -81,7 +81,7 @@ private:
     static double page_fault_time() {
         uint64_t start, end;
         
-        size_t file_size = 5 * pow(2, 30), stride = 256 * pow(2, 20);
+        size_t file_size = 5 * pow(2, 30), stride = 1024 * pow(2, 20);
         int repeat = (int)(file_size / stride);
         string file_name = base_dir + "temp";
         FILE *fptr = fopen(file_name.data(), "w");
