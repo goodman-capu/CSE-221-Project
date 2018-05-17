@@ -30,13 +30,11 @@ private:
         int repeat = 1024, stride = size / repeat;
         
         int *array = (int *)malloc(size * sizeof(int));
-        for (int i = 0; i < size; i++) {
-            array[i] = (i + stride) % size;
-        }
+        memset(array, 0, size * sizeof(int));
         start = rdtsc();
-        int temp = 0;
-        for (int i = 0; i < repeat; i++) {
-            temp = array[temp];
+        int temp;
+        for (int i = 0; i < size; i += stride) {
+            temp = array[i];
         }
         end = rdtsc();
         free(array);
