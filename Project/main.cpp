@@ -10,7 +10,7 @@
 #include "Memory.cpp"
 
 int main(int argc, const char * argv[]) {
-//    CPU::measure_all();
+    CPU::measure_all();
     Memory::measure_all();
     return 0;
 }

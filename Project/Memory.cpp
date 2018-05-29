@@ -17,9 +17,9 @@ public:
         for (int i = 10; i < 28; i++) {
             sizes.push_back(pow(2, i));
         }
-        Measurer::measure_multi(memory_access_latency, sizes, "Memory Access", "Array Size", "Latency");
-        Measurer::measure(memory_read_bandwidth, "Memory Read", "Bandwidth");
-        Measurer::measure(memory_write_bandwidth, "Memory Write", "Bandwidth");
+//        Measurer::measure_multi(memory_access_latency, sizes, "Memory Access", "Array Size", "Latency", Measurer::STD |  Measurer::MIN);
+//        Measurer::measure(memory_read_bandwidth, "Memory Read", "Bandwidth");
+//        Measurer::measure(memory_write_bandwidth, "Memory Write", "Bandwidth");
         Measurer::measure(page_fault_time, "Page Fault", "Time");
     }
     
@@ -30,13 +30,11 @@ private:
         int repeat = 1024, stride = size / repeat;
         
         int *array = (int *)malloc(size * sizeof(int));
-        for (int i = 0; i < size; i++) {
-            array[i] = (i + stride) % size;
-        }
+        memset(array, 0, size * sizeof(int));
         start = rdtsc();
         int temp = 0;
-        for (int i = 0; i < repeat; i++) {
-            temp = array[temp];
+        for (int i = 0; i < size; i += stride) {
+            temp = array[i];
         }
         end = rdtsc();
         free(array);
@@ -53,8 +51,18 @@ private:
         memset(data, 1, total_size);
         memset(buffer, 0, read_size);
         start = rdtsc();
-        for (int i = 0; i < repeat; i++) {
-            memcpy(buffer, data + i * read_size, read_size);
+//        for (int i = 0; i < repeat; i++) {
+//            memcpy(buffer, data + i * read_size, read_size);
+//        }
+        for (int i = 0; i < repeat; i += 8) {
+            memcpy(buffer, data + (i + 0) * read_size, read_size);
+            memcpy(buffer, data + (i + 1) * read_size, read_size);
+            memcpy(buffer, data + (i + 2) * read_size, read_size);
+            memcpy(buffer, data + (i + 3) * read_size, read_size);
+            memcpy(buffer, data + (i + 4) * read_size, read_size);
+            memcpy(buffer, data + (i + 5) * read_size, read_size);
+            memcpy(buffer, data + (i + 6) * read_size, read_size);
+            memcpy(buffer, data + (i + 7) * read_size, read_size);
         }
         end = rdtsc();
         free(data);

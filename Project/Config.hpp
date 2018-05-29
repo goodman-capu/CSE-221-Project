@@ -13,6 +13,6 @@
 
 using namespace std;
 
-static string base_dir = "/Users/Frank/Documents/Code/CSE 221/Project/Project/Results/";
+static string base_dir = "/Users/zhanyuan/Documents/GitHub/CSE221_Project/Project/Results/";
 
 #endif
