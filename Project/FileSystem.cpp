@@ -14,6 +14,7 @@
 class FileSystem {
 public:
     static void measure_all() {
+        create_files();
         Measurer::measure(seq_file_read_time, "Sequential File Read", "Time");
         Measurer::measure(random_file_read_time, "Random File Read", "Time");
         Measurer::measure(contention_read_time, "Contention Read", "Time");
