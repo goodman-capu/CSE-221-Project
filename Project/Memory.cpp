@@ -32,6 +32,7 @@ private:
         int *array = (int *)malloc(size * sizeof(int));
         memset(array, 0, size * sizeof(int));
         start = rdtsc();
+
         int temp = 0;
         for (int i = 0; i < size; i += stride) {
             temp = array[i];
