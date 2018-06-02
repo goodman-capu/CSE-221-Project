@@ -8,9 +8,11 @@
 
 #include "CPU.cpp"
 #include "Memory.cpp"
+#include "File_System.cpp"
 
 int main(int argc, const char * argv[]) {
     CPU::measure_all();
     Memory::measure_all();
+    File_System::measure_all();
     return 0;
 }
