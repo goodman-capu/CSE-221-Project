@@ -18,13 +18,18 @@ public:
         Measurer::measure(seq_file_read_time, "Sequential File Read", "Time");
         Measurer::measure(random_file_read_time, "Random File Read", "Time");
         Measurer::measure(contention_read_time, "Contention Read", "Time");
+        remove_files();
     }
     
 private:
+    static string file_name_of_size(size_t size_MB) {
+        return base_dir + "File_" + to_string(size_MB) + "MB.data";
+    }
+    
     static void create_files() {
         for (int i = 2; i <= 512; i *= 2) {
             size_t file_size = pow(2, 20 * i);
-            string file_name = base_dir + "File_" + to_string(i) + "MB.data";
+            string file_name = file_name_of_size(file_size);
             // Check if file exists
             if (access(file_name.data(), F_OK) == 0) {
                 continue;
@@ -35,7 +40,14 @@ private:
             fwrite(content, sizeof(char), file_size, fptr);
             free(content);
             fclose(fptr);
-            cout << file_name << " written" << endl;
+        }
+    }
+    
+    static void remove_files() {
+        for (int i = 2; i <= 512; i *= 2) {
+            size_t file_size = pow(2, 20 * i);
+            string file_name = file_name_of_size(file_size);
+            remove(file_name.data());
         }
     }
     
