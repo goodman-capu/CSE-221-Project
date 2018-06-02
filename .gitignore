@@ -24,3 +24,5 @@ DerivedData/
 
 /Project/Results/*
 /Project/measure
+/Project/Config.hpp
+
