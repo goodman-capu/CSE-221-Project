@@ -10,33 +10,35 @@
 #include "Measurer.hpp"
 #include <fcntl.h>
 #include <sys/mman.h>
-#include <unistd.h>
 
-class File_System {
+class FileSystem {
 public:
     static void measure_all() {
-        Measurer::measure(seq_file_read_time, "Seq File Read", "Time");
+        Measurer::measure(seq_file_read_time, "Sequential File Read", "Time");
         Measurer::measure(random_file_read_time, "Random File Read", "Time");
-        Measurer::measure(contention_read, "Contention Read", "Time");
+        Measurer::measure(contention_read_time, "Contention Read", "Time");
     }
     
 private:
+    static void create_files() {
+        for (int i = 2; i <= 512; i *= 2) {
+            size_t file_size = pow(2, 20 * i);
+            string file_name = base_dir + "File_" + to_string(i) + "MB.data";
+            // Check if file exists
+            if (access(file_name.data(), F_OK) == 0) {
+                continue;
+            }
+            FILE *fptr = fopen(file_name.data(), "w");
+            char *content = (char *)malloc(file_size);
+            memset(content, 0, file_size);
+            fwrite(content, sizeof(char), file_size, fptr);
+            free(content);
+            fclose(fptr);
+            cout << file_name << " written" << endl;
+        }
+    }
+    
     static double seq_file_read_time() {
-        
-//        for (int i = 2; i <= 8; i++) {
-//
-//            int pow_size = 20 + i;
-//            size_t file_size = pow(2, pow_size);
-//
-//            size_t stride_size =  pow(2, 12);
-//
-//            FILE *fptr = fopen(file_name.data(), "w");
-//            char *content = (char *)malloc(file_size);
-//            memset(content, 0, file_size);
-//            fwrite(content, sizeof(char), file_size, fptr);
-//            free(content);
-//            fclose(fptr);
-//        }
         uint64_t start, end, total_time = 0;
         int i = 8;
         string file_name = base_dir + "read_time/" + "File_" + to_string((int)pow(2,i)) + ".txt";
@@ -85,7 +87,8 @@ private:
         free(buffer);
         return total_time / num;
     }
-    static double readFile(int i) {
+    
+    static double read_file(int i) {
         uint64_t start, end, total_time = 0;
         string file_name = base_dir + "block" + to_string(i+1) + ".txt";
         
@@ -105,30 +108,29 @@ private:
             }
             end = rdtsc();
             total_time += end - start;
-
         }
         free(buffer);
         close(fd);
         return total_time / (double)(total_size / read_size);
     }
-    static double contention_read() {
-        
+    
+    static double contention_read_time() {
         pid_t pid[10];
         double read_time[10] = {0.0};
         double parent_read_time = 0.0;
        
-        for ( int i = 0; i < 9; ++i) {
+        for ( int i = 0; i < 9; i++) {
             if ((pid[i] = fork()) < 0) {
                 perror("fork");
                 abort();
             } else if (pid[i] == 0) {
-                read_time[i] = readFile(i+1);
-                //cout << "read_time " << read_time[i] << endl;
+                read_time[i] = read_file(i+1);
                 exit(0);
-            }else{
+            } else{
             }
         }
-         parent_read_time = readFile(0);
+        
+        parent_read_time = read_file(0);
         return parent_read_time;
     }
 };

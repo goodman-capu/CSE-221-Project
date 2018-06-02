@@ -15,18 +15,18 @@ static int parent_pipe[2], child_pipe[2];
 class CPU {
 public:
     static void measure_all() {
-//        Measurer::measure(time_overhead, "Time", "Overhead");
+        Measurer::measure(time_overhead, "Time", "Overhead");
         Measurer::measure(loop_overhead, "Loop", "Overhead");
-//        for (int i = 0; i <= 7; ++i) {
-//            function<double()> func = [&i](){return procedure_call_overhead(i);};
-//            Measurer::measure(func, "Procedure Call (" + to_string(i) + " params)", "Overhead");
-//        }
-//        Measurer::measure(system_call_overhead, "System Call", "Overhead");
-//        Measurer::measure(process_create_overhead, "Process Create", "Overhead", Measurer::STD | Measurer::MIN);
-//        Measurer::measure(thread_create_overhead, "Thread Create", "Overhead", Measurer::STD | Measurer::MIN);
-//        Measurer::measure(pipe_overhead, "Pipe", "Overhead");
-//        Measurer::measure(process_context_switch_overhead, "Process Context Switch", "Overhead", Measurer::STD | Measurer::MIN);
-//        Measurer::measure(thread_context_switch_overhead, "Thread Context Switch", "Overhead", Measurer::STD | Measurer::MIN);
+        for (int i = 0; i <= 7; ++i) {
+            function<double()> func = [&i](){return procedure_call_overhead(i);};
+            Measurer::measure(func, "Procedure Call (" + to_string(i) + " params)", "Overhead");
+        }
+        Measurer::measure(system_call_overhead, "System Call", "Overhead");
+        Measurer::measure(process_create_overhead, "Process Create", "Overhead", Measurer::STD | Measurer::MIN);
+        Measurer::measure(thread_create_overhead, "Thread Create", "Overhead", Measurer::STD | Measurer::MIN);
+        Measurer::measure(pipe_overhead, "Pipe", "Overhead");
+        Measurer::measure(process_context_switch_overhead, "Process Context Switch", "Overhead", Measurer::STD | Measurer::MIN);
+        Measurer::measure(thread_context_switch_overhead, "Thread Context Switch", "Overhead", Measurer::STD | Measurer::MIN);
     }
     
 private:
