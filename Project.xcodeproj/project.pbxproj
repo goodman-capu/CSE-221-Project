@@ -76,11 +76,7 @@
 				0119B5D620A7FD3900C73BEF /* Measurer.cpp */,
 				014E677C208D3554005AAED1 /* CPU.cpp */,
 				0119B5D420A7FB8D00C73BEF /* Memory.cpp */,
-<<<<<<< Updated upstream
 				0181ED9920C3514B00BE6937 /* FileSystem.cpp */,
-=======
-				BE3BC0C520BDE88800AB484C /* FileSystem.cpp */,
->>>>>>> Stashed changes
 			);
 			path = Project;
 			sourceTree = "<group>";

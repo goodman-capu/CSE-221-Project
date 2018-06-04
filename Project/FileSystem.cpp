@@ -14,19 +14,17 @@
 class FileSystem {
 public:
     static void measure_all() {
-        //create_files();
+        create_files(); //generate the files needed for this file system measurement
         vector<int> file_sizes;
         for (int i = 2; i <= 8; i++) {
-            file_sizes.push_back(pow(2, i));
+            file_sizes.push_back(i);
         }
         vector<int> num;
         for (int i = 1; i <= 9; i++) {
             num.push_back(i);
         }
-        //Measurer::measure_multi(memory_access_latency, sizes, "Memory Access", "Array Size", "Latency");
-
-//        Measurer::measure_multi(seq_file_read_time, file_sizes, "Sequential File Read", "File Size", "Time");
-//        Measurer::measure_multi(random_file_read_time, file_sizes, "Random File Read", "File Size", "Time");
+        Measurer::measure_multi(seq_file_read_time, file_sizes, "Sequential File Read", "File Size", "Time");
+        Measurer::measure_multi(random_file_read_time, file_sizes, "Random File Read", "File Size", "Time");
         Measurer::measure_multi(contention_read_time, num, "Contention Read", "Process", "Time");
     }
     
@@ -59,13 +57,13 @@ private:
     
     static double seq_file_read_time(int i) {
         uint64_t start, end, total_time = 0;
-        string file_name = base_dir + "read_time/" + "File_" + to_string((int)pow(2,i)) + ".txt";
+        string file_name = base_dir + "read_time/File_" + to_string((int)pow(2,i)) + "MB.txt";
         size_t total_size = pow(2, 20 + i), read_size =  pow(2, 12);
         void *buffer = malloc(read_size);
         
         int fd = open(file_name.data(), O_SYNC);
         if(fcntl(fd, F_NOCACHE, 1) == -1) {
-            printf("Failed.\n");
+            cout << "fail" << endl;
         }
         while (TRUE) {
             start = rdtsc();
@@ -83,13 +81,13 @@ private:
     
     static double random_file_read_time(int i) {
         uint64_t start, end, total_time = 0;
-        string file_name = base_dir + "read_time/" + "File_" + to_string((int)pow(2,i)) + ".txt";
+        string file_name = base_dir + "read_time/File_" + to_string((int)pow(2,i)) + "MB.txt";
         size_t total_size = pow(2, 20 + i), read_size =  pow(2, 12);
         void * buffer = malloc(read_size);
         
         int fd = open(file_name.data(), O_SYNC);
         if(fcntl(fd, F_NOCACHE, 1) == -1) {
-            printf("Failed.\n");
+            cout << "fail" << endl;
         }
         off_t num = total_size / read_size;
         for (int i = 0; i < num; i++) {
@@ -115,8 +113,8 @@ private:
 
         int fd = open(file_name.data(), O_SYNC);
         if(fcntl(fd, F_NOCACHE, 1) == -1) {
-            printf("Failed.\n");
-        };
+            cout << "fail" << endl;
+        }
         while (TRUE) {
             start = rdtsc();
             ssize_t bytes = read(fd, buffer, read_size);
