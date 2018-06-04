@@ -26,9 +26,14 @@ public:
         Measurer::measure_multi(seq_file_read_time, file_sizes, "Sequential File Read", "File Size", "Time");
         Measurer::measure_multi(random_file_read_time, file_sizes, "Random File Read", "File Size", "Time");
         Measurer::measure_multi(contention_read_time, num, "Contention Read", "Process", "Time");
+        remove_files();
     }
     
 private:
+    static string file_name_of_size(size_t size_MB) {
+        return base_dir + "File_" + to_string(size_MB) + "MB.data";
+    }
+    
     static void create_files() {
         for (int i = 2; i <= 8; i++) {
             int pow_size = 20 + i;
@@ -52,6 +57,16 @@ private:
             free(content);
             fclose(fptr);
             cout << file_name << endl;
+    }
+    
+    static void remove_files() {
+        for (int i = 2; i <= 8; i++) {
+            string file_name = base_dir + "read_time/File_" + to_string((int)pow(2,i)) + "MB.txt";
+            remove(file_name.data());
+        }
+        for (int i = 0; i < 10; i++) {
+            string file_name = base_dir + "contention_read/block" + to_string(i) + ".txt";
+            remove(file_name.data());
         }
     }
     
