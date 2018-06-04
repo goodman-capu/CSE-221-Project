@@ -36,6 +36,7 @@
 		014E677E208ED10A005AAED1 /* Config.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Config.hpp; sourceTree = "<group>"; };
 		0181ED9920C3514B00BE6937 /* FileSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileSystem.cpp; sourceTree = "<group>"; };
 		01FEFCCC2091BCDA00198479 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		BE3BC0C520BDE88800AB484C /* FileSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FileSystem.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,6 +141,7 @@
 				0181ED9A20C3514B00BE6937 /* FileSystem.cpp in Sources */,
 				0119B5D720A7FD3900C73BEF /* Measurer.cpp in Sources */,
 				014E677D208D3554005AAED1 /* CPU.cpp in Sources */,
+				BE3BC0C620BDE88800AB484C /* FileSystem.cpp in Sources */,
 				0119B5D520A7FB8D00C73BEF /* Memory.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
