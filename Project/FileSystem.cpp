@@ -57,6 +57,7 @@ private:
             free(content);
             fclose(fptr);
             cout << file_name << endl;
+        }
     }
     
     static void remove_files() {
