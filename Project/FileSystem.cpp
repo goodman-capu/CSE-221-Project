@@ -20,7 +20,7 @@ public:
         create_files();
 
 //        vector<int> file_sizes_cache;
-//        for (int i = 8; i <= 11; i++) {
+//        for (int i = 8; i <= 14; i++) {
 //            file_sizes_cache.push_back(pow(2, i));
 //        }
 //        Measurer::measure_multi(file_read_cache, file_sizes_cache, "File Read Cache", "File Size (MB)", "Time");
@@ -64,7 +64,7 @@ private:
     static void create_files() {
         cout << "Creating temp files" << endl;
         mkdir_if_not_exists(temp_file_dir);
-        for (int i = 2; i <= 11; i++) {
+        for (int i = 2; i <= 14; i++) {
             string file_name = read_time_file_name(pow(2, i));
             size_t file_size = pow(2, 20 + i);
             read_time_infos[file_name] = file_size;
@@ -133,7 +133,7 @@ private:
     static double seq_file_read_time(int size_MB) {
         string file_name = read_time_file_name(size_MB);
         size_t file_size = read_time_infos[file_name];
-        size_t step_size = min(file_size, (size_t)pow(2, 30));
+        size_t step_size = pow(2, 12); // 4KB
         double MB_per_second = read_file_time(file_name, file_size, step_size);
         return MB_per_second;
     }
@@ -146,26 +146,27 @@ private:
         return MB_per_second;
     }
     
+    static double contention_read(int block_no) {
+        string file_name = contention_read_file_name(block_no);
+        size_t file_size = contention_read_infos[file_name];
+        size_t step_size = min(file_size, (size_t)pow(2, 30));
+        return read_file_time(file_name, file_size, step_size);
+    }
+    
     static double contention_read_time(int process_num) {
         system("sudo -S purge");
         
-        for (int block_no = 0; block_no < process_num; block_no++) {
+        for (int i = 0; i < process_num; i++) {
             int pid;
             if ((pid = fork()) < 0) {
                 perror("fork");
                 abort();
             } else if (pid == 0) {
-                string file_name = contention_read_file_name(block_no + 1);
-                size_t file_size = contention_read_infos[file_name];
-                size_t step_size = min(file_size, (size_t)pow(2, 30));
-                read_file_time(file_name, file_size, step_size);
+                contention_read(i + 1);
                 exit(EXIT_SUCCESS);
             }
         }
         
-        string file_name = contention_read_file_name(0);
-        size_t file_size = contention_read_infos[file_name];
-        size_t step_size = min(file_size, (size_t)pow(2, 30));
-        return read_file_time(file_name, file_size, step_size);
+        return contention_read(0);
     }
 };
