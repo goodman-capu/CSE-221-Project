@@ -34,6 +34,10 @@ inline uint64_t rdtsc() {
 }
 #endif
 
+void mkdir_if_not_exists(string dir_name);
+
+void rmdir_if_exists(string dir_name);
+
 struct m_stat {
     double mean;
     double std;

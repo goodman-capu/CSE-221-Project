@@ -9,6 +9,22 @@
 #include "Measurer.hpp"
 #include <sys/stat.h>
 
+void mkdir_if_not_exists(string dir_name) {
+    struct stat dir_stat;
+    stat(dir_name.data(), &dir_stat);
+    if (!S_ISDIR(dir_stat.st_mode)) {
+        mkdir(dir_name.data(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    }
+}
+
+void rmdir_if_exists(string dir_name) {
+    struct stat dir_stat;
+    stat(dir_name.data(), &dir_stat);
+    if (S_ISDIR(dir_stat.st_mode)) {
+        rmdir(dir_name.data());
+    }
+}
+
 m_stat get_stats(vector<double> &results) {
     m_stat s;
     s.mean = accumulate(results.begin(), results.end(), 0.0) / results.size();
@@ -55,11 +71,7 @@ void Measurer::measure_multi(function<double(int)> func, vector<int> params, str
         cout << "Measure " << bind_name << " " << type << " Begins" << endl;
         
         string dir_name = base_dir + func_name + "/";
-        struct stat dir_stat;
-        stat(dir_name.data(), &dir_stat);
-        if (!S_ISDIR(dir_stat.st_mode)) {
-            mkdir(dir_name.data(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-        }
+        mkdir_if_not_exists(dir_name);
         
         string file_name = dir_name + param_name + " " + to_string(param) + ".txt";
         m_stat s = _measure(bind_func, cout, file_name, filters);
