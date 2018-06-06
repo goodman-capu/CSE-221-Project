@@ -122,7 +122,8 @@ private:
         void *buffer = malloc(step_size);
         int fd = open(file_name.data(), O_SYNC);
         if (fcntl(fd, F_NOCACHE, no_cache) == -1) {
-            cout << "Setting F_NOCACHE failed" << endl;
+            perror("Setting F_NOCACHE failed");
+            return 0;
         }
         start = rdtsc();
         if (!random) {
