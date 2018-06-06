@@ -9,51 +9,64 @@
 
 #include "Measurer.hpp"
 #include <unordered_map>
+#include <sys/stat.h>
 #include <fcntl.h>
 
-static string temp_file_dir = base_dir + "Temp Files/";
-static unordered_map<string, size_t> read_time_infos, contention_read_infos;
+static unordered_map<string, size_t> local_read_info, local_contention_info, remote_read_info;
+static size_t block_size = pow(2, 12); // 4KB
 
 class FileSystem {
 public:
     static void measure_all() {
         create_files();
+        
+        vector<int> file_sizes_cache;
+        for (int i = 5; i <= 14; i++) {
+            file_sizes_cache.push_back(pow(2, i));
+        }
+        Measurer::measure_multi(file_read_cache, file_sizes_cache, "File Read Cache", "File Size (MB)", "Time");
 
-//        vector<int> file_sizes_cache;
-//        for (int i = 8; i <= 14; i++) {
-//            file_sizes_cache.push_back(pow(2, i));
-//        }
-//        Measurer::measure_multi(file_read_cache, file_sizes_cache, "File Read Cache", "File Size (MB)", "Time");
-//
         vector<int> file_sizes;
         for (int i = 2; i <= 8; i++) {
             file_sizes.push_back(pow(2, i));
         }
-        Measurer::measure_multi(seq_file_read_time, file_sizes, "Sequential File Read", "File Size (MB)", "Time");
-        Measurer::measure_multi(random_file_read_time, file_sizes, "Random File Read", "File Size (MB)", "Time");
-//
-//        vector<int> process_nums;
-//        for (int i = 1; i <= 9; i++) {
-//            process_nums.push_back(i);
-//        }
-//        Measurer::measure_multi(contention_read_time, process_nums, "Contention Read", "Process", "Time");
-//        remove_files();
+        Measurer::measure_multi(local_seq_read_time, file_sizes, "Sequential File Read", "File Size (MB)", "Time");
+        Measurer::measure_multi(local_random_read_time, file_sizes, "Random File Read", "File Size (MB)", "Time");
+        Measurer::measure_multi(remote_sql_read_time, file_sizes, "Sequential Remote File Read", "File Size (MB)", "Time");
+        Measurer::measure_multi(remote_random_read_time, file_sizes, "Random Remote File Read", "File Size (MB)", "Time");
+
+        vector<int> process_nums;
+        for (int i = 1; i <= 9; i++) {
+            process_nums.push_back(i);
+        }
+        Measurer::measure_multi(contention_read_time, process_nums, "Contention Read", "Process", "Time");
+        remove_files();
     }
     
 private:
-    static string read_time_file_name(int size_MB) {
-        return temp_file_dir + "File_" + to_string(size_MB) + "MB";
+    static string temp_file_dir(string base_dir) {
+        return base_dir + "Temp Files/";
     }
     
-    static string contention_read_file_name(int block_no) {
-        return temp_file_dir + "Block_" + to_string(block_no);
+    static string read_file_name(string base_dir, int size_MB) {
+        return temp_file_dir(base_dir) + "File_" + to_string(size_MB) + "MB";
+    }
+    
+    static string contention_file_name(string base_dir, int block_no) {
+        return temp_file_dir(base_dir) + "Block_" + to_string(block_no);
     }
     
     static void create_file(string file_name, size_t file_size) {
-        if (access(file_name.data(), F_OK) == 0) {
+        struct stat file_stat;
+        stat(file_name.data(), &file_stat);
+        if (S_ISREG(file_stat.st_mode) && file_stat.st_size == file_size) {
             return;
         }
         FILE *fptr = fopen(file_name.data(), "w");
+        if (fptr == nullptr) {
+            perror(("Creating " + file_name + " failed").data());
+            return;
+        }
         char *content = (char *)malloc(file_size);
         memset(content, '0', file_size);
         fwrite(content, sizeof(char), file_size, fptr);
@@ -63,31 +76,42 @@ private:
     
     static void create_files() {
         cout << "Creating temp files" << endl;
-        mkdir_if_not_exists(temp_file_dir);
+        mkdir_if_not_exists(temp_file_dir(base_dir));
+        mkdir_if_not_exists(temp_file_dir(NFS_base_dir));
         for (int i = 2; i <= 14; i++) {
-            string file_name = read_time_file_name(pow(2, i));
+            string local_file_name = read_file_name(base_dir, pow(2, i));
             size_t file_size = pow(2, 20 + i);
-            read_time_infos[file_name] = file_size;
-            create_file(file_name, file_size);
+            local_read_info[local_file_name] = file_size;
+            create_file(local_file_name, file_size);
+        }
+        for (int i = 2; i <= 8; i++) {
+            string remote_file_name = read_file_name(NFS_base_dir, pow(2, i));
+            size_t file_size = pow(2, 20 + i);
+            remote_read_info[remote_file_name] = file_size;
+            create_file(remote_file_name, file_size);
         }
         for (int i = 0; i < 10; i++) {
-            string file_name = contention_read_file_name(i);
+            string local_file_name = contention_file_name(base_dir, i);
             size_t file_size = pow(2, 26);
-            contention_read_infos[file_name] = file_size;
-            create_file(file_name, file_size);
+            local_contention_info[local_file_name] = file_size;
+            create_file(local_file_name, file_size);
         }
         cout << "Done!" << endl;
     }
     
     static void remove_files() {
         cout << "Removing temp files" << endl;
-        for (auto info : read_time_infos) {
+        for (auto info : local_read_info) {
             remove(info.first.data());
         }
-        for (auto info : contention_read_infos) {
+        for (auto info : remote_read_info) {
             remove(info.first.data());
         }
-        rmdir_if_exists(temp_file_dir);
+        for (auto info : local_contention_info) {
+            remove(info.first.data());
+        }
+        rmdir_if_exists(temp_file_dir(base_dir));
+        rmdir_if_exists(temp_file_dir(NFS_base_dir));
         cout << "Done!" << endl;
     }
     
@@ -123,32 +147,44 @@ private:
     }
     
     static double file_read_cache(int size_MB) {
-        string file_name = read_time_file_name(size_MB);
-        size_t file_size = read_time_infos[file_name];
+        string file_name = read_file_name(base_dir, size_MB);
+        size_t file_size = local_read_info[file_name];
         size_t step_size = min(file_size, (size_t)pow(2, 30));
         
         return read_file_time(file_name, file_size, step_size, false);
     }
     
-    static double seq_file_read_time(int size_MB) {
-        string file_name = read_time_file_name(size_MB);
-        size_t file_size = read_time_infos[file_name];
-        size_t step_size = pow(2, 12); // 4KB
-        double MB_per_second = read_file_time(file_name, file_size, step_size);
+    static double local_seq_read_time(int size_MB) {
+        string file_name = read_file_name(base_dir, size_MB);
+        size_t file_size = local_read_info[file_name];
+        double MB_per_second = read_file_time(file_name, file_size, block_size);
         return MB_per_second;
     }
     
-    static double random_file_read_time(int size_MB) {
-        string file_name = read_time_file_name(size_MB);
-        size_t file_size = read_time_infos[file_name];
-        size_t step_size = pow(2, 12); // 4KB
-        double MB_per_second = read_file_time(file_name, file_size, step_size, true, true);
+    static double local_random_read_time(int size_MB) {
+        string file_name = read_file_name(base_dir, size_MB);
+        size_t file_size = local_read_info[file_name];
+        double MB_per_second = read_file_time(file_name, file_size, block_size, true, true);
+        return MB_per_second;
+    }
+    
+    static double remote_sql_read_time(int size_MB) {
+        string file_name = read_file_name(NFS_base_dir, size_MB);
+        size_t file_size = remote_read_info[file_name];
+        double MB_per_second = read_file_time(file_name, file_size, block_size);
+        return MB_per_second;
+    }
+    
+    static double remote_random_read_time(int size_MB) {
+        string file_name = read_file_name(NFS_base_dir, size_MB);
+        size_t file_size = remote_read_info[file_name];
+        double MB_per_second = read_file_time(file_name, file_size, block_size, true, true);
         return MB_per_second;
     }
     
     static double contention_read(int block_no) {
-        string file_name = contention_read_file_name(block_no);
-        size_t file_size = contention_read_infos[file_name];
+        string file_name = contention_file_name(base_dir, block_no);
+        size_t file_size = local_contention_info[file_name];
         size_t step_size = min(file_size, (size_t)pow(2, 30));
         return read_file_time(file_name, file_size, step_size);
     }
