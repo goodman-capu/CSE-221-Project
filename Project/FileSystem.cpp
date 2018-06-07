@@ -135,10 +135,10 @@ private:
     }
     
     // Returns read speed in MB/s
-    static double read_file_time(string file_name, size_t file_size, size_t step_size, bool no_cache = true, bool random = false) {
+    static double read_file_time(string file_name, size_t file_size, size_t read_size, bool no_cache = true, bool random = false) {
         uint64_t start, end;
         
-        void *buffer = malloc(step_size);
+        void *buffer = malloc(read_size);
         int fd = open(file_name.data(), O_SYNC);
         if (fd == -1) {
             perror("Open file failed");
@@ -151,16 +151,16 @@ private:
         start = rdtsc();
         if (!random) {
             while (true) {
-                ssize_t bytes = read(fd, buffer, step_size);
+                ssize_t bytes = read(fd, buffer, read_size);
                 if (bytes <= 0) {
                     break;
                 }
             }
         } else {
-            int repeat = (int)file_size / step_size;
+            int repeat = (int)file_size / read_size;
             for (int i = 0; i < repeat; i++) {
-                lseek(fd, (arc4random() % repeat) * step_size, SEEK_SET);
-                read(fd, buffer, step_size);
+                lseek(fd, (arc4random() % repeat) * read_size, SEEK_SET);
+                read(fd, buffer, read_size);
             }
         }
         end = rdtsc();
