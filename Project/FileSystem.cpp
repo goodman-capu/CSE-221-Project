@@ -140,8 +140,12 @@ private:
         
         void *buffer = malloc(step_size);
         int fd = open(file_name.data(), O_SYNC);
+        if (fd == -1) {
+            perror("Open file failed");
+            return 0;
+        }
         if (fcntl(fd, F_NOCACHE, no_cache) == -1) {
-            perror("Setting F_NOCACHE failed");
+            perror("Set F_NOCACHE failed");
             return 0;
         }
         start = rdtsc();
@@ -166,59 +170,58 @@ private:
         return (file_size / pow(2, 20)) / ((end - start) / pow(10, 9));
     }
     
+    static inline double ms_per_block(double MB_per_second) {
+        return 1000 / (MB_per_second * (pow(2, 20) / block_size));
+    }
+    
     static double file_read_cache(int size_MB) {
         string file_name = read_file_name(base_dir, size_MB);
         size_t file_size = local_read_info[file_name];
         size_t step_size = min(file_size, (size_t)pow(2, 30));
-        
         return read_file_time(file_name, file_size, step_size, false);
     }
     
     static double local_seq_read_time(int size_MB) {
         string file_name = read_file_name(base_dir, size_MB);
         size_t file_size = local_read_info[file_name];
-        double MB_per_second = read_file_time(file_name, file_size, block_size);
-        return MB_per_second;
+        return ms_per_block(read_file_time(file_name, file_size, block_size));
     }
     
     static double local_random_read_time(int size_MB) {
         string file_name = read_file_name(base_dir, size_MB);
         size_t file_size = local_read_info[file_name];
-        double MB_per_second = read_file_time(file_name, file_size, block_size, true, true);
-        return MB_per_second;
+        return ms_per_block(read_file_time(file_name, file_size, block_size, true, true));
     }
     
     static double remote_sql_read_time(int size_MB) {
         string file_name = read_file_name(NFS_base_dir, size_MB);
         size_t file_size = remote_read_info[file_name];
-        double MB_per_second = read_file_time(file_name, file_size, block_size);
-        return MB_per_second;
+        return ms_per_block(read_file_time(file_name, file_size, block_size));
     }
     
     static double remote_random_read_time(int size_MB) {
         string file_name = read_file_name(NFS_base_dir, size_MB);
         size_t file_size = remote_read_info[file_name];
-        double MB_per_second = read_file_time(file_name, file_size, block_size, true, true);
-        return MB_per_second;
+        return ms_per_block(read_file_time(file_name, file_size, block_size, true, true));
     }
     
     static double contention_read(int block_no) {
         string file_name = contention_file_name(base_dir, block_no);
         size_t file_size = contention_info[file_name];
         size_t step_size = min(file_size, (size_t)pow(2, 30));
-        return read_file_time(file_name, file_size, step_size);
+        return ms_per_block(read_file_time(file_name, file_size, step_size));
     }
     
     static double contention_read_time(int process_num) {
         system("sudo -S purge");
         
-        for (int i = 0; i < process_num; i++) {
+        for (int i = 1; i <= process_num; i++) {
             int pid;
             if ((pid = fork()) < 0) {
-                perror("fork");
+                perror("fork() failed");
                 abort();
             } else if (pid == 0) {
-                contention_read(i + 1);
+                contention_read(i);
                 exit(EXIT_SUCCESS);
             }
         }
