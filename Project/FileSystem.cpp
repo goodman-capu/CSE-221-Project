@@ -12,23 +12,24 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-static unordered_map<string, size_t> local_read_info, local_contention_info, remote_read_info;
+static unordered_map<string, size_t> local_cache_info, local_read_info, local_contention_info, remote_read_info;
 static size_t block_size = pow(2, 12); // 4KB
+static int process_max_num = 10;
 
 class FileSystem {
 public:
     static void measure_all() {
         create_files();
         
-        vector<int> file_sizes_cache;
-        for (int i = 5; i <= 14; i++) {
-            file_sizes_cache.push_back(pow(2, i));
+        vector<int> cache_sizes;
+        for (auto kv : local_cache_info) {
+            cache_sizes.push_back((int)kv.second);
         }
-        Measurer::measure_multi(file_read_cache, file_sizes_cache, "File Read Cache", "File Size (MB)", "Time");
+        Measurer::measure_multi(file_read_cache, cache_sizes, "File Read Cache", "File Size (MB)", "Time");
 
         vector<int> file_sizes;
-        for (int i = 2; i <= 8; i++) {
-            file_sizes.push_back(pow(2, i));
+        for (auto kv : local_read_info) {
+            file_sizes.push_back((int)kv.second);
         }
         Measurer::measure_multi(local_seq_read_time, file_sizes, "Sequential File Read", "File Size (MB)", "Time");
         Measurer::measure_multi(local_random_read_time, file_sizes, "Random File Read", "File Size (MB)", "Time");
@@ -36,7 +37,7 @@ public:
         Measurer::measure_multi(remote_random_read_time, file_sizes, "Random Remote File Read", "File Size (MB)", "Time");
 
         vector<int> process_nums;
-        for (int i = 1; i <= 9; i++) {
+        for (int i = 1; i < process_max_num; i++) {
             process_nums.push_back(i);
         }
         Measurer::measure_multi(contention_read_time, process_nums, "Contention Read", "Process", "Time");
@@ -78,19 +79,23 @@ private:
         cout << "Creating temp files" << endl;
         mkdir_if_not_exists(temp_file_dir(base_dir));
         mkdir_if_not_exists(temp_file_dir(NFS_base_dir));
-        for (int i = 2; i <= 14; i++) {
-            string local_file_name = read_file_name(base_dir, pow(2, i));
-            size_t file_size = pow(2, 20 + i);
-            local_read_info[local_file_name] = file_size;
-            create_file(local_file_name, file_size);
+        for (int i = 6; i <= 12; i++) {
+            string local_cache_name = read_file_name(base_dir, i * pow(2, 10));
+            size_t file_size = i * pow(2, 30);
+            local_cache_info[local_cache_name] = file_size;
+            create_file(local_cache_name, file_size);
         }
+        
         for (int i = 2; i <= 8; i++) {
+            string local_file_name = read_file_name(base_dir, pow(2, i));
             string remote_file_name = read_file_name(NFS_base_dir, pow(2, i));
             size_t file_size = pow(2, 20 + i);
+            local_read_info[local_file_name] = file_size;
             remote_read_info[remote_file_name] = file_size;
+            create_file(local_file_name, file_size);
             create_file(remote_file_name, file_size);
         }
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < process_max_num; i++) {
             string local_file_name = contention_file_name(base_dir, i);
             size_t file_size = pow(2, 26);
             local_contention_info[local_file_name] = file_size;
@@ -101,6 +106,9 @@ private:
     
     static void remove_files() {
         cout << "Removing temp files" << endl;
+        for (auto info : local_cache_info) {
+            remove(info.first.data());
+        }
         for (auto info : local_read_info) {
             remove(info.first.data());
         }
