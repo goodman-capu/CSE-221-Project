@@ -12,9 +12,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-static unordered_map<string, size_t> local_cache_info, local_read_info, remote_read_info, local_contention_info;
+static unordered_map<string, size_t> cache_info, local_read_info, remote_read_info, contention_info;
+static int process_max_num;
 static size_t block_size = 4 * pow(2, 10); // 4KB
-static int process_max_num = 10;
 
 class FileSystem {
 public:
@@ -22,22 +22,28 @@ public:
         create_files();
         
         vector<int> cache_sizes;
-        for (auto kv : local_cache_info) {
+        for (auto kv : cache_info) {
             cache_sizes.push_back((int)kv.second / pow(2, 20));
         }
         sort(cache_sizes.begin(), cache_sizes.end());
         Measurer::measure_multi(file_read_cache, cache_sizes, "File Read Cache", "File Size (MB)", "Time");
 
-        vector<int> file_sizes;
+        vector<int> local_file_sizes;
         for (auto kv : local_read_info) {
-            file_sizes.push_back((int)kv.second / pow(2, 20));
+            local_file_sizes.push_back((int)kv.second / pow(2, 20));
         }
-        sort(file_sizes.begin(), file_sizes.end());
-        Measurer::measure_multi(local_seq_read_time, file_sizes, "Sequential File Read", "File Size (MB)", "Time");
-        Measurer::measure_multi(local_random_read_time, file_sizes, "Random File Read", "File Size (MB)", "Time");
-        Measurer::measure_multi(remote_sql_read_time, file_sizes, "Sequential Remote File Read", "File Size (MB)", "Time");
-        Measurer::measure_multi(remote_random_read_time, file_sizes, "Random Remote File Read", "File Size (MB)", "Time");
-
+        sort(local_file_sizes.begin(), local_file_sizes.end());
+        Measurer::measure_multi(local_seq_read_time, local_file_sizes, "Sequential File Read", "File Size (MB)", "Time");
+        Measurer::measure_multi(local_random_read_time, local_file_sizes, "Random File Read", "File Size (MB)", "Time");
+        
+        vector<int> remote_file_sizes;
+        for (auto kv : remote_read_info) {
+            remote_file_sizes.push_back((int)kv.second / pow(2, 20));
+        }
+        sort(remote_file_sizes.begin(), remote_file_sizes.end());
+        Measurer::measure_multi(remote_sql_read_time, remote_file_sizes, "Sequential Remote File Read", "File Size (MB)", "Time");
+        Measurer::measure_multi(remote_random_read_time, remote_file_sizes, "Random Remote File Read", "File Size (MB)", "Time");
+        
         vector<int> process_nums;
         for (int i = 1; i < process_max_num; i++) {
             process_nums.push_back(i);
@@ -84,22 +90,26 @@ private:
         for (int i = 6; i <= 12; i++) {
             string local_cache_name = read_file_name(base_dir, i * pow(2, 10));
             size_t file_size = i * pow(2, 30);
-            local_cache_info[local_cache_name] = file_size;
+            cache_info[local_cache_name] = file_size;
             create_file(local_cache_name, file_size);
         }
         for (int i = 2; i <= 8; i++) {
             string local_file_name = read_file_name(base_dir, pow(2, i));
-            string remote_file_name = read_file_name(NFS_base_dir, pow(2, i));
             size_t file_size = pow(2, 20 + i);
             local_read_info[local_file_name] = file_size;
-            remote_read_info[remote_file_name] = file_size;
             create_file(local_file_name, file_size);
+        }
+        for (int i = 2; i <= 8; i++) {
+            string remote_file_name = read_file_name(NFS_base_dir, pow(2, i));
+            size_t file_size = pow(2, 20 + i);
+            remote_read_info[remote_file_name] = file_size;
             create_file(remote_file_name, file_size);
         }
+        process_max_num = 10;
         for (int i = 0; i < process_max_num; i++) {
             string local_file_name = contention_file_name(base_dir, i);
             size_t file_size = pow(2, 26);
-            local_contention_info[local_file_name] = file_size;
+            contention_info[local_file_name] = file_size;
             create_file(local_file_name, file_size);
         }
         cout << "Done!" << endl;
@@ -107,7 +117,7 @@ private:
     
     static void remove_files() {
         cout << "Removing temp files" << endl;
-        for (auto info : local_cache_info) {
+        for (auto info : cache_info) {
             remove(info.first.data());
         }
         for (auto info : local_read_info) {
@@ -116,7 +126,7 @@ private:
         for (auto info : remote_read_info) {
             remove(info.first.data());
         }
-        for (auto info : local_contention_info) {
+        for (auto info : contention_info) {
             remove(info.first.data());
         }
         rmdir_if_exists(temp_file_dir(base_dir));
@@ -194,7 +204,7 @@ private:
     
     static double contention_read(int block_no) {
         string file_name = contention_file_name(base_dir, block_no);
-        size_t file_size = local_contention_info[file_name];
+        size_t file_size = contention_info[file_name];
         size_t step_size = min(file_size, (size_t)pow(2, 30));
         return read_file_time(file_name, file_size, step_size);
     }
