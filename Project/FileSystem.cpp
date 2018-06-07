@@ -12,8 +12,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-static unordered_map<string, size_t> local_cache_info, local_read_info, local_contention_info, remote_read_info;
-static size_t block_size = pow(2, 12); // 4KB
+static unordered_map<string, size_t> local_cache_info, local_read_info, remote_read_info, local_contention_info;
+static size_t block_size = 4 * pow(2, 10); // 4KB
 static int process_max_num = 10;
 
 class FileSystem {
@@ -23,14 +23,16 @@ public:
         
         vector<int> cache_sizes;
         for (auto kv : local_cache_info) {
-            cache_sizes.push_back((int)kv.second);
+            cache_sizes.push_back((int)kv.second / pow(2, 20));
         }
+        sort(cache_sizes.begin(), cache_sizes.end());
         Measurer::measure_multi(file_read_cache, cache_sizes, "File Read Cache", "File Size (MB)", "Time");
 
         vector<int> file_sizes;
         for (auto kv : local_read_info) {
-            file_sizes.push_back((int)kv.second);
+            file_sizes.push_back((int)kv.second / pow(2, 20));
         }
+        sort(file_sizes.begin(), file_sizes.end());
         Measurer::measure_multi(local_seq_read_time, file_sizes, "Sequential File Read", "File Size (MB)", "Time");
         Measurer::measure_multi(local_random_read_time, file_sizes, "Random File Read", "File Size (MB)", "Time");
         Measurer::measure_multi(remote_sql_read_time, file_sizes, "Sequential Remote File Read", "File Size (MB)", "Time");
@@ -85,7 +87,6 @@ private:
             local_cache_info[local_cache_name] = file_size;
             create_file(local_cache_name, file_size);
         }
-        
         for (int i = 2; i <= 8; i++) {
             string local_file_name = read_file_name(base_dir, pow(2, i));
             string remote_file_name = read_file_name(NFS_base_dir, pow(2, i));
