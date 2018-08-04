@@ -13,7 +13,7 @@
 
 using namespace std;
 
-static string base_dir = "/Users/Frank/Documents/Code/CSE 221/Project/Project/Results/";
-static string NFS_base_dir = "/net/fanzhikangde-MacBook-Pro.local/Users/Frank/Documents/Code/CSE 221/Project/Project/Results/";
+static string base_dir = "/Users/frank/Documents/Code/Course/CSE 221/Project/Results/";
+static string NFS_base_dir = "/net/fanzhikangde-MacBook-Pro.local/Users/frank/Documents/Code/Course/CSE 221/Project/Results/";
 
 #endif
